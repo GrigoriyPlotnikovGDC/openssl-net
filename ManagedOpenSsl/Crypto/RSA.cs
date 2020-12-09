@@ -445,6 +445,41 @@ namespace OpenSSL.Crypto
 		}
 
 		/// <summary>
+		/// Calls RSA_sign()
+		/// </summary>
+		/// <param name="msg"></param>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public byte[] Sign(int type, byte[] msg)
+		{
+			uint siglen;
+			var ret = new byte[this.Size];
+			Native.ExpectSuccess(Native.RSA_sign(type, msg, (uint)msg.Length, ret, out siglen,  ptr));
+
+			if (siglen != ret.Length)
+			{
+				var tmp = new byte[siglen];
+				Buffer.BlockCopy(ret, 0, tmp, 0, (int)siglen);
+				return tmp;
+			}
+
+			return ret;
+		}
+
+		/// <summary>
+		/// Calls RSA_verify()
+		/// </summary>
+		/// <param name="msg"></param>
+		/// <param name="sig"></param>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public bool Verify(int type, byte[] msg, byte[] sig)
+		{
+			var res = Native.RSA_verify(type, msg, (uint)msg.Length, sig, (uint)sig.Length, ptr);
+			return res == 1;
+		}
+
+		/// <summary>
 		/// Calls PEM_write_bio_RSA_PUBKEY()
 		/// </summary>
 		/// <param name="bio"></param>
